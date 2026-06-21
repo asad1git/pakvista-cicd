@@ -1,0 +1,63 @@
+name: CI – Development Environment
+
+# Trigger: fires on every Pull Request targeting the "develop" branch
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  ci-dev:
+    name: Build & Push Docker Image (dev)
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1 – Checkout repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2 – Lint HTML and CSS
+      - name: Install Linting Tools
+        run: |
+          npm install -g htmlhint stylelint stylelint-config-standard
+
+      - name: Lint HTML Files
+        run: |
+          htmlhint "*.html" || true
+
+      - name: Lint CSS File
+        run: |
+          echo '{"extends":["stylelint-config-standard"]}' > .stylelintrc.json
+          stylelint "style.css" || true
+
+      # Step 3 – Docker Login
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Step 4 – Build Docker image (no push yet)
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/pakvista:dev-latest
+
+      # Step 5 – Tag image with commit SHA
+      - name: Tag Image with Commit SHA
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/pakvista:dev-latest \
+                       -t ${{ secrets.DOCKERHUB_USERNAME }}/pakvista:dev-$SHORT_SHA .
+          echo "Tagged: dev-latest and dev-$SHORT_SHA"
+
+      # Step 6 – Push image to Docker Hub
+      - name: Push Docker Image to Docker Hub
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pakvista:dev-latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pakvista:dev-$SHORT_SHA
+          echo "✅ Dev image pushed: dev-latest and dev-$SHORT_SHA"

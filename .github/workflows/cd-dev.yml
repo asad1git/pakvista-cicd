@@ -1,0 +1,32 @@
+name: CD – Development Environment
+
+# Trigger: fires on every push to "develop" (i.e. when a PR is merged)
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  cd-dev:
+    name: Deploy to Render – Development
+    runs-on: ubuntu-latest
+    environment: development  # grants access to RENDER_DEPLOY_HOOK_DEV_URL
+
+    steps:
+      # Step 1 – Checkout repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2 – Environment declared above on the job level
+
+      # Step 3 – Trigger Render deployment via deploy hook
+      - name: Deploy to Render (Development)
+        run: |
+          echo "🚀 Triggering deployment to Development environment..."
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_DEV_URL }}"
+
+      # Step 4 – Output timestamped confirmation
+      - name: Deployment Confirmation
+        run: |
+          echo "✅ Deployment to Development triggered at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "Live at: pakvista-dev on Render"

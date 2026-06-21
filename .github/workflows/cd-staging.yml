@@ -1,0 +1,32 @@
+name: CD – Staging Environment
+
+# Trigger: fires on every push to "staging" (i.e. when a PR is merged into staging)
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  cd-staging:
+    name: Deploy to Render – Staging
+    runs-on: ubuntu-latest
+    environment: staging  # grants access to RENDER_DEPLOY_HOOK_STAGING_URL
+
+    steps:
+      # Step 1 – Checkout repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2 – Environment declared above on the job level
+
+      # Step 3 – Trigger Render deployment via deploy hook
+      - name: Deploy to Render (Staging)
+        run: |
+          echo "🚀 Triggering deployment to Staging environment..."
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_STAGING_URL }}"
+
+      # Step 4 – Output timestamped confirmation
+      - name: Deployment Confirmation
+        run: |
+          echo "✅ Deployment to Staging triggered at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "Live at: pakvista-staging on Render"

@@ -1,0 +1,32 @@
+name: CD – Production Environment
+
+# Trigger: fires on every push to "main" (i.e. when a PR is merged into main)
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cd-prod:
+    name: Deploy to Render – Production
+    runs-on: ubuntu-latest
+    environment: production  # grants access to RENDER_DEPLOY_HOOK_PROD_URL
+
+    steps:
+      # Step 1 – Checkout repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2 – Environment declared above on the job level
+
+      # Step 3 – Trigger Render deployment via deploy hook
+      - name: Deploy to Render (Production)
+        run: |
+          echo "🚀 Triggering deployment to Production environment..."
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_PROD_URL }}"
+
+      # Step 4 – Output timestamped confirmation
+      - name: Deployment Confirmation
+        run: |
+          echo "✅ Deployment to Production triggered at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "Live at: pakvista-prod on Render"
