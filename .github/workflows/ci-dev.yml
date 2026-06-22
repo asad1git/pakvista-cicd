@@ -35,7 +35,7 @@ jobs:
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/pakvista"
-          docker build -t $IMAGE:dev-latest -t $IMAGE:dev-$SHORT_SHA .
-          docker push $IMAGE:dev-latest
-          docker push $IMAGE:dev-$SHORT_SHA
-          echo "✅ Pushed $IMAGE:dev-latest and $IMAGE:dev-$SHORT_SHA"
+          docker build -t ${IMAGE}:dev-latest -t ${IMAGE}:dev-${SHORT_SHA} .
+          docker push ${IMAGE}:dev-latest
+          docker push ${IMAGE}:dev-${SHORT_SHA}
+          echo "✅ Pushed ${IMAGE}:dev-latest and ${IMAGE}:dev-${SHORT_SHA}"
